@@ -7,6 +7,7 @@ import path from "path";
 import authRoutes from "./src/routes/auth.route.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import SeedDB from "./src/DB/seed.js";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ connectDB()
   .then(() => {
     server.listen(port, () => {
       console.log(`🚀 Server running on port ${port}`);
+      SeedDB();
     });
   })
   .catch((err) => {

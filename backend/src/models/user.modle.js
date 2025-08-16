@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
 		verificationTokenExpiresAt: Date,
 		QuesDone:[{
 			type:mongoose.Schema.Types.ObjectId,
-			ref:Ques,
+			ref:"Ques",
 		}],
 	},
 	{ timestamps: true }

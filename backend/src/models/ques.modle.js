@@ -9,21 +9,21 @@ const quesSchema = new mongoose.Schema(
         },
         difficulty:{
             type:String,
-            enum:["easy","medium","difficult"]
+            enum:["easy","medium","hard"]
         },
         
         YURL:{
-            type:string
+            type:String
         },
         P1URL:{
-            type:string
+            type:String
         },
         P2URL:{
-            type:string
+            type:String
         },
         tag:{
-            type:string,
-            enum:["Learn the basics","Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]","Recursion [PatternWise]","Bit Manipulation [Concepts & Problems]","Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]","Sliding Window & Two Pointer Combined Problems","Heaps [Learning, Medium, Hard Problems]","Greedy Algorithms [Easy, Medium/Hard]","Binary Trees [Traversals, Medium and Hard Problems]","Binary Search Trees [Concept and Problems]","Graphs [Concepts & Problems]","Dynamic Programming [Patterns and Problems]","Tries"]
+            type:String,
+            enum:["Learn the basics","Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]","Recursion [PatternWise]","Bit Manipulation [Concepts & Problems]","Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]","Sliding Window & Two Pointer Combined Problems","Heaps [Learning, Medium, Hard Problems]","Greedy Algorithms [Easy, Medium/Hard]","Binary Trees [Traversals, Medium and Hard Problems]","Binary Search Trees [Concept and Problems]","Graphs [Concepts & Problems]","Dynamic Programming [Patterns and Problems]","Tries","Strings"]
         }
         
 
