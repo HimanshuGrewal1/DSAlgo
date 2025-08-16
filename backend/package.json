@@ -7,7 +7,7 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-  "dev": "nodemon -r dotenv/config --experimental-json-modules server.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules server.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -17,7 +17,10 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.14.2"
+    "mailtrap": "^4.2.0",
+    "mongoose": "^8.14.2",
+    "nodemailer": "^6.10.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "morgan": "^1.10.1",

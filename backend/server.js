@@ -1,24 +1,60 @@
-import express from "express"
-import dotenv from "dotenv"
+import express from "express";
+import dotenv from "dotenv";
 import connectDB from "./src/DB/connectMongoDB.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import path from "path";
+import authRoutes from "./src/routes/auth.route.js";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
+dotenv.config();
 
 const app = express();
-dotenv.config()
+const port = process.env.PORT || 8000;
 
 
-const port=process.env.PORT || 8000
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
 
 
-app.get("/",(req,res)=>{
-    res.send("Server is ready")
-})
+app.get("/", (req, res) => {
+  res.send("Server is ready");
+});
+app.use("/api/auth", authRoutes);
 
 
+const server = createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+// });
 
 
+// io.on("connection", (socket) => {
+//   console.log(" New client connected:", socket.id);
 
-app.listen(port,()=>{
-    console.log(`Server is runing at port ${port}`)
-    connectDB()
-})
+//   socket.on("message", (data) => {
+//     console.log(" Message received:", data);
+//     io.emit("message", data); 
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected:", socket.id);
+//   });
+// });
+
+
+connectDB()
+  .then(() => {
+    server.listen(port, () => {
+      console.log(`🚀 Server running on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Failed to connect DB:", err);
+  });
