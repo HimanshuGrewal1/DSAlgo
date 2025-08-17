@@ -6,7 +6,7 @@ export const GETQUES = async (req, res) =>{
      try {
     let { search, difficulty, page, limit } = req.query;
 
-
+    console.log(difficulty, search, page, limit);
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
 
@@ -16,18 +16,18 @@ export const GETQUES = async (req, res) =>{
       query.title = { $regex: search, $options: "i" }; 
     }
     if (difficulty) {
-      query.difficulty = difficulty; 
+      query.difficulty = difficulty.toLowerCase(); 
+      
     }
 
   
     const skip = (page - 1) * limit;
-
    
     const questions = await Ques.find(query)
       .skip(skip)
       .limit(limit);
 
-   
+  
      const total = await Ques.countDocuments(query);
 
    

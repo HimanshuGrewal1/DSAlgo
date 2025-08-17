@@ -1,139 +1,98 @@
-import { motion } from "framer-motion";
-import { useAuthStore } from "../store/authStore";
-import { formatDate } from "../utils/date";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import LoadingSpinner from "../components/LoadingSpinner";
 
-const DashboardPage = () => {
-    const { user, logout } = useAuthStore();
+export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const [progress, setProgress] = useState(0);
 
+  useEffect(() => {
+   
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/user/getUser", {
+          withCredentials: true,
+        });
+        setUser(data.user);
 
-    const handleLogout = () => {
-        logout();
+      
+        const totalQues = data.total;
+        const completed = data.user.QuesDone?.length || 0;
+        console.log(data);
+        setProgress(((completed / totalQues) * 100).toFixed(1));
+      } catch (err) {
+        console.error(err);
+      }
     };
 
-    const [questions, setQuestions] = useState([]);
-  const [search, setSearch] = useState("");
-  const [difficulty, setDifficulty] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
-  const [total, setTotal] = useState(0);
-  const [totalPages,settotalPages] = useState(0);
+    fetchUser();
+  }, []);
 
- useEffect(() => {
-    fetchQuestions();
-  }, [search, difficulty, page, limit]);
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-xl font-semibold">Loading Dashboard...</p>
+      </div>
+    );
+  }
+  // console.log("User Data:", user);
+
+  return (
+    <div className="pt-20">
+    <div className="min-h-screen bg-gray-50 p-6">
    
-    const fetchQuestions = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/GETQUES", {
-        params: {
-          search,
-          difficulty,
-          page,
-          limit,
-        },
-      });
-     
-      +   setQuestions(res.data.data); 
-+   setTotal(res.data.total);
-+   settotalPages(res.data.totalPages); 
-    } catch (err) {
-      console.error(err);
-    }
-      settotalPages(Math.ceil(total / limit));
-  };
-
-   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        Questions Explorer
-      </h1>
-
-    
-      <div className="flex gap-4 mb-6 justify-center">
-       
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="border p-2 rounded-lg w-64"
-        />
-
-     
-        <select
-          value={difficulty}
-          onChange={(e) => {
-            setPage(1);
-            setDifficulty(e.target.value);
-          }}
-          className="border p-2 rounded-lg"
-        >
-          <option value="">All Difficulties</option>
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
-        </select>
-
-      
-        <select
-          value={limit}
-          onChange={(e) => {
-            setPage(1);
-            setLimit(parseInt(e.target.value));
-          }}
-          className="border p-2 rounded-lg"
-        >
-          <option value={5}>5 per page</option>
-          <option value={10}>10 per page</option>
-          <option value={20}>20 per page</option>
-        </select>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Welcome back, {user.name} 👋
+        </h1>
+        <p className="text-gray-600">
+          Last Login: {new Date(user.lastLogin).toLocaleString()}
+        </p>
       </div>
 
-      
-      <div className="grid gap-4 max-w-2xl mx-auto">
-        {questions.length > 0 ? (
-          questions.map((q) => (
-            <div
-              key={q._id}
-              className="bg-white p-4 shadow-md rounded-lg border"
-            >
-              <h2 className="text-lg font-semibold">{q.title}</h2>
-              <p className="text-sm text-gray-600">Difficulty: {q.difficulty}</p>
-            </div>
-          ))
+      {/* Progress Tracker */}
+      <div className="bg-white shadow rounded-2xl p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-3">Progress Tracker</h2>
+        <div className="w-full bg-gray-200 rounded-full h-4">
+          <div
+            className="bg-blue-500 h-4 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        <p className="mt-2 text-gray-700">{progress}% Completed</p>
+      </div>
+
+      {/* Bookmarked Questions */}
+      <div className="bg-white shadow rounded-2xl p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-3">Bookmarked Questions</h2>
+        {user.BookMark && user.BookMark.length > 0 ? (
+          <ul className="list-disc pl-5 space-y-2">
+            {user.BookMark.map((q) => (
+              <li key={q._id} className="text-gray-700">
+                {q.title || "Untitled Question"}
+              </li>
+            ))}
+          </ul>
         ) : (
-          <p className="text-center text-gray-500">No questions found.</p>
+          <p className="text-gray-500">No bookmarks yet.</p>
         )}
       </div>
 
-      
-      <div className="flex justify-center items-center gap-4 mt-6">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
-          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Prev
-        </button>
-        <span>
-          Page {page} of {totalPages || 1}
-        </span>
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage((p) => p + 1)}
-          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
+    
+      <div className="bg-white shadow rounded-2xl p-6">
+        <h2 className="text-xl font-semibold mb-3">Completed Questions</h2>
+        {user.QuesDone && user.QuesDone.length > 0 ? (
+          <ul className="list-decimal pl-5 space-y-2">
+            {user.QuesDone.map((q) => (
+              <li key={q._id} className="text-gray-700">
+                {q.title || "Untitled Question"}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No completed questions yet.</p>
+        )}
       </div>
     </div>
+    </div>
   );
-};
-
-export default DashboardPage;
+}

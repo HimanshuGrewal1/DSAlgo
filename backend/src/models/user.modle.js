@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
 			type:mongoose.Schema.Types.ObjectId,
 			ref:"Ques",
 		}],
+		BookMark:[{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Ques",
+		}]
 	},
 	{ timestamps: true }
 );

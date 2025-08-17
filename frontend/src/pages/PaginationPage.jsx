@@ -1,59 +1,89 @@
-import { motion } from "framer-motion";
+
 import { useAuthStore } from "../store/authStore";
-import { formatDate } from "../utils/date";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 const PaginationPage = () => {
-    const { user, logout } = useAuthStore();
-
-
-    const handleLogout = () => {
-        logout();
-    };
-
-    const [questions, setQuestions] = useState([]);
+  const { user ,isAuthenticated} = useAuthStore(); 
+//   const isAuthenticated=true
+  const [questions, setQuestions] = useState([]);
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
-  const [totalPages,settotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
- useEffect(() => {
+  useEffect(() => {
     fetchQuestions();
   }, [search, difficulty, page, limit]);
-   
-    const fetchQuestions = async () => {
+
+  const fetchQuestions = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/GETQUES", {
-        params: {
-          search,
-          difficulty,
-          page,
-          limit,
-        },
+        params: { search, difficulty, page, limit },
       });
-     
-      +   setQuestions(res.data.data); 
-+   setTotal(res.data.total);
-+   settotalPages(res.data.totalPages); 
+
+      setQuestions(res.data.data);
+      setTotal(res.data.total);
+      setTotalPages(res.data.totalPages);
     } catch (err) {
       console.error(err);
     }
-      settotalPages(Math.ceil(total / limit));
   };
 
-   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+  
+  const getDifficultyBadge = (diff) => {
+    const colors = {
+      easy: "bg-green-200 text-green-800",
+      medium: "bg-yellow-200 text-yellow-800",
+      hard: "bg-red-200 text-red-800",
+    };
+    
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-semibold rounded ${colors[diff] || "bg-gray-200 text-gray-800"}`}
+      >
+        {diff}
+      </span>
+    );
+  };
+
+
+  const toggleDone = async (qid) => {
+    try {
+      await axios.post(
+        `http://localhost:5000/api/user/MarkDone/${qid}`,
+      
+        { withCredentials: true }
+      );
+      fetchQuestions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleBookmark = async (qid) => {
+    try {
+      await axios.post(
+        `http://localhost:5000/api/user/MarkBookMark/${qid}`,
+    
+        { withCredentials: true }
+      );
+      fetchQuestions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  return (
+     <div className="pt-20">
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
       <h1 className="text-2xl font-bold mb-4 text-center">
-        Questions Explorer
+        DSAlgo
       </h1>
 
-    
-      <div className="flex gap-4 mb-6 justify-center">
-       
+ 
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-center">
         <input
           type="text"
           placeholder="Search by title..."
@@ -62,17 +92,16 @@ const PaginationPage = () => {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="border p-2 rounded-lg w-64"
+          className="border p-2 rounded-lg w-full sm:w-64"
         />
 
-     
         <select
           value={difficulty}
           onChange={(e) => {
             setPage(1);
             setDifficulty(e.target.value);
           }}
-          className="border p-2 rounded-lg"
+          className="border p-2 rounded-lg w-full sm:w-auto"
         >
           <option value="">All Difficulties</option>
           <option value="Easy">Easy</option>
@@ -80,14 +109,13 @@ const PaginationPage = () => {
           <option value="Hard">Hard</option>
         </select>
 
-      
         <select
           value={limit}
           onChange={(e) => {
             setPage(1);
             setLimit(parseInt(e.target.value));
           }}
-          className="border p-2 rounded-lg"
+          className="border p-2 rounded-lg w-full sm:w-auto"
         >
           <option value={5}>5 per page</option>
           <option value={10}>10 per page</option>
@@ -95,16 +123,66 @@ const PaginationPage = () => {
         </select>
       </div>
 
-      
+
       <div className="grid gap-4 max-w-2xl mx-auto">
         {questions.length > 0 ? (
           questions.map((q) => (
             <div
               key={q._id}
-              className="bg-white p-4 shadow-md rounded-lg border"
+              className="bg-white p-4 shadow-md rounded-lg border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             >
-              <h2 className="text-lg font-semibold">{q.title}</h2>
-              <p className="text-sm text-gray-600">Difficulty: {q.difficulty}</p>
+ 
+              <div>
+                <h2 className="text-lg font-semibold">{q.title}</h2>
+                <p className="text-sm mt-1">
+                  Difficulty: {getDifficultyBadge(q.difficulty)}
+                </p>
+                 <p>
+                                 <span className="font-semibold">Youtube:</span>{" "}
+                                     <a
+                                          href={q.YURL}
+                                             target="_blank"
+                                             rel="noopener noreferrer"
+                                                 className="text-blue-500 underline"
+                                     >
+                                     {q.YURL || "Unknown"}
+                                    </a>
+                                    </p>
+                {q.P1URL && (
+                                      <a
+                                        href={q.P1URL}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-blue-600 hover:underline"
+                                      >
+                                        View Problem
+                                      </a>
+                                    )}
+                                     {q.P2URL && (
+                                      <a
+                                        href={q.P2URL}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-blue-600 hover:underline"
+                                      >
+                                        View Problem
+                                      </a>
+                                    )}
+              </div>
+
+
+              {isAuthenticated && (
+                <div className="flex gap-4 items-center">
+                  <label className="flex items-center gap-1">
+                    <input type="checkbox" onChange={()=>toggleDone(q._id)} className="accent-green-600" />
+                    <span className="text-sm">Done</span>
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input type="checkbox" onChange={()=>toggleBookmark(q._id)} className="accent-blue-600" />
+                    <span className="text-sm">Bookmark</span>
+                  </label>
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -112,7 +190,7 @@ const PaginationPage = () => {
         )}
       </div>
 
-      
+
       <div className="flex justify-center items-center gap-4 mt-6">
         <button
           disabled={page === 1}
@@ -132,6 +210,7 @@ const PaginationPage = () => {
           Next
         </button>
       </div>
+    </div>
     </div>
   );
 };

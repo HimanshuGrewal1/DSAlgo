@@ -82,6 +82,17 @@ function App() {
 					}
 				/>
 				<Route
+					path='/dashboard'
+					element={
+						  <ProtectedRoute> 
+						<>
+							<Navbar/>
+							<DashboardPage />
+							</>
+						  </ProtectedRoute> 
+					}
+				/>
+				<Route
 					path='/signup'
 					element={
 						<RedirectAuthenticatedUser>

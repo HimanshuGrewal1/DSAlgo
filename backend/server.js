@@ -9,6 +9,7 @@ import GetQues from "./src/routes/GetQues.route.js"
 import { createServer } from "http";
 import { Server } from "socket.io";
 import SeedDB from "./src/DB/seed.js";
+import UserRoute from "./src/routes/GetUser.route.js"
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/GETQUES",GetQues)
+app.use("/api/user",UserRoute );
 
 
 const server = createServer(app);
