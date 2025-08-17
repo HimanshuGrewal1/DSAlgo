@@ -13,7 +13,9 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/authStore";
 import { useEffect } from "react";
-
+import HomePage from "./pages/HomePage";
+import Navbar from "./components/Navbar";
+import PaginationPage from "./pages/PaginationPage";
 
 const ProtectedRoute = ({ children }) => {
 	const { isAuthenticated, user } = useAuthStore();
@@ -55,13 +57,27 @@ function App() {
     from-gray-900 via-blue-500 to-blue-900 flex items-center justify-center relative overflow-hidden'
 		>
 	
-
+           {/* <Navbar/> */}
 			<Routes>
 				<Route
 					path='/'
 					element={
-						//  <ProtectedRoute>
-							<DashboardPage />
+						//  <ProtectedRoute> 
+						<>
+							<Navbar/>
+							<HomePage />
+							</>
+						 // </ProtectedRoute> 
+					}
+				/>
+				<Route
+					path='/pagination'
+					element={
+						//  <ProtectedRoute> 
+						<>
+							<Navbar/>
+							<PaginationPage />
+							</>
 						 // </ProtectedRoute> 
 					}
 				/>

@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 import authRoutes from "./src/routes/auth.route.js";
+import GetQues from "./src/routes/GetQues.route.js"
 import { createServer } from "http";
 import { Server } from "socket.io";
 import SeedDB from "./src/DB/seed.js";
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
   res.send("Server is ready");
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/GETQUES",GetQues)
 
 
 const server = createServer(app);
@@ -53,10 +55,10 @@ const server = createServer(app);
 connectDB()
   .then(() => {
     server.listen(port, () => {
-      console.log(`🚀 Server running on port ${port}`);
-      SeedDB();
+      console.log(`Server running on port ${port}`);
+    //   SeedDB();
     });
   })
   .catch((err) => {
-    console.error("❌ Failed to connect DB:", err);
+    console.error("Failed to connect DB:", err);
   });

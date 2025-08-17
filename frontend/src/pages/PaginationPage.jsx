@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-const DashboardPage = () => {
+const PaginationPage = () => {
     const { user, logout } = useAuthStore();
 
 
@@ -136,4 +136,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default PaginationPage;
