@@ -13,6 +13,8 @@ const PaginationPage = () => {
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+   const [doneSet, setDoneSet] = useState(new Set());
+  const [bookmarkSet, setBookmarkSet] = useState(new Set());
 
   useEffect(() => {
     fetchQuestions();
@@ -27,6 +29,10 @@ const PaginationPage = () => {
       setQuestions(res.data.data);
       setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
+        if (user) {
+        setDoneSet(new Set(user.QuesDone || []));
+        setBookmarkSet(new Set(user.BookMark || []));
+      }
     } catch (err) {
       console.error(err);
     }
@@ -57,6 +63,12 @@ const PaginationPage = () => {
       
         { withCredentials: true }
       );
+       setDoneSet((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(qid)) newSet.delete(qid);
+        else newSet.add(qid);
+        return newSet;
+      });
       fetchQuestions();
     } catch (err) {
       console.error(err);
@@ -70,6 +82,12 @@ const PaginationPage = () => {
     
         { withCredentials: true }
       );
+        setBookmarkSet((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(qid)) newSet.delete(qid);
+        else newSet.add(qid);
+        return newSet;
+      });
       fetchQuestions();
     } catch (err) {
       console.error(err);
@@ -126,10 +144,17 @@ const PaginationPage = () => {
 
       <div className="grid gap-4 max-w-2xl mx-auto">
         {questions.length > 0 ? (
-          questions.map((q) => (
+          questions.map((q) =>{ 
+             const isDone = doneSet.has(q._id);
+                              const isBookmarked = bookmarkSet.has(q._id);
+            
+            return (
             <div
               key={q._id}
-              className="bg-white p-4 shadow-md rounded-lg border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              className={`${ isDone
+                                      ? "bg-green-100 border-green-400"
+                                      : "bg-white"
+                                  } p-4 shadow-md rounded-lg border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}
             >
  
               <div>
@@ -174,21 +199,22 @@ const PaginationPage = () => {
               {isAuthenticated && (
                 <div className="flex gap-4 items-center">
                   <label className="flex items-center gap-1">
-                    <input type="checkbox" onChange={()=>toggleDone(q._id)} className="accent-green-600" />
+                    <input type="checkbox"  checked={isDone} onChange={()=>toggleDone(q._id)} className="accent-green-600" />
                     <span className="text-sm">Done</span>
                   </label>
                   <label className="flex items-center gap-1">
-                    <input type="checkbox" onChange={()=>toggleBookmark(q._id)} className="accent-blue-600" />
+                    <input type="checkbox"  checked={isBookmarked} onChange={()=>toggleBookmark(q._id)} className="accent-blue-600" />
                     <span className="text-sm">Bookmark</span>
                   </label>
                 </div>
               )}
             </div>
-          ))
+          )})
         ) : (
           <p className="text-center text-gray-500">No questions found.</p>
         )}
       </div>
+      
 
 
       <div className="flex justify-center items-center gap-4 mt-6">

@@ -50,7 +50,7 @@ export const GETQUES = async (req, res) =>{
 export const GetCat=async (req,res) => {
        try {
    let query={}
-    const Cato = await Cat.find(query).populate("question", "title difficulty YURL P1URL P2URL tag");
+    const Cato = await Cat.find(query)
 
      const total = await Cat.countDocuments(query);
 
@@ -66,3 +66,18 @@ export const GetCat=async (req,res) => {
     return res.status(500).json({ error: err.message });
   }
 }
+
+export const GetQuesByCat = async (req, res) => {
+  try {
+    const { id } = req.params;
+  
+    const Catquestions = await Cat.findById(id).populate("question");
+    if (!Catquestions || Catquestions.length === 0) {
+      return res.status(404).json({ message: "No questions found for this category" });
+    }
+    res.status(200).json({ data: Catquestions });
+  } catch (error) {
+    console.error("Error fetching questions by category:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

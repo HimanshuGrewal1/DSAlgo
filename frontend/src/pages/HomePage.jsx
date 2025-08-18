@@ -5,36 +5,70 @@ import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const HomePage = () => {
-  const { user, logout } = useAuthStore(); 
+  const { user } = useAuthStore();
 
   const [cats, setCats] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [Ques, setQues] = useState([]);
   const [openCat, setOpenCat] = useState(null);
+  const [catId,setcatId]=useState(null);
   const [openQues, setOpenQues] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [doneSet, setDoneSet] = useState(new Set());
+  const [bookmarkSet, setBookmarkSet] = useState(new Set());
 
-  const fetchQuestions = async () => {
+  const fetchCat = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/GETQUES/GetCat");
+      const res = await axios.get("http://localhost:5000/api/GETQUES/GetCat", {
+        withCredentials: true,
+      });
+
       setCats(res.data.data);
-      setTotal(res.data.total);
+
+      
+     if (user) {
+        setDoneSet(new Set(user.QuesDone || []));
+        setBookmarkSet(new Set(user.BookMark || []));
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+   console.log(catId)
+   const fetchQuesByCat = async () => {
+   if(catId){ try {
+      const res = await axios.get(`http://localhost:5000/api/GETQUES/GetQuesByCat/${catId}`, {
+       
+      });
+      console.log(res);
+    setQues(res.data.data.question)
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }}
+  };
+
+    
 
   const toggleDone = async (qid) => {
     try {
       await axios.post(
         `http://localhost:5000/api/user/MarkDone/${qid}`,
-      
+        {},
         { withCredentials: true }
       );
-      fetchQuestions();
+
+  
+      setDoneSet((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(qid)) newSet.delete(qid);
+        else newSet.add(qid);
+        return newSet;
+      });
     } catch (err) {
-      console.error(err);
+      console.error("Error marking done:", err);
     }
   };
 
@@ -42,30 +76,42 @@ const HomePage = () => {
     try {
       await axios.post(
         `http://localhost:5000/api/user/MarkBookMark/${qid}`,
-    
+        {},
         { withCredentials: true }
       );
-      fetchQuestions();
+
+   
+      setBookmarkSet((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(qid)) newSet.delete(qid);
+        else newSet.add(qid);
+        return newSet;
+      });
     } catch (err) {
-      console.error(err);
+      console.error("Error bookmarking:", err);
     }
   };
 
   useEffect(() => {
-    fetchQuestions();
+    fetchCat();
   }, []);
 
-  
+  useEffect(() => {
+    fetchQuesByCat();
+  }, [openCat]);
+
   const getDifficultyBadge = (diff) => {
     const colors = {
       easy: "bg-green-200 text-green-800",
       medium: "bg-yellow-200 text-yellow-800",
       hard: "bg-red-200 text-red-800",
     };
-    
+
     return (
       <span
-        className={`px-2 py-1 text-xs font-semibold rounded ${colors[diff] || "bg-gray-200 text-gray-800"}`}
+        className={`px-2 py-1 text-xs font-semibold rounded ${
+          colors[diff] || "bg-gray-200 text-gray-800"
+        }`}
       >
         {diff}
       </span>
@@ -89,11 +135,11 @@ const HomePage = () => {
                   key={cat._id || index}
                   className="bg-white shadow-md rounded-lg border"
                 >
-         
                   <button
-                    onClick={() =>
+                    onClick={() =>{
                       setOpenCat(openCat === index ? null : index)
-                    }
+                      setcatId(cat._id)
+                    }}
                     className="w-full flex justify-between items-center px-4 py-3 text-left text-lg font-semibold text-gray-700 hover:bg-gray-50"
                   >
                     {cat.title}
@@ -111,101 +157,114 @@ const HomePage = () => {
                         transition={{ duration: 0.3 }}
                         className="px-4 pb-3"
                       >
-                        {cat.question && cat.question.length > 0 ? (
+                        {Ques && Ques.length > 0 ? (
                           <ul className="space-y-2 mt-2">
-                            {cat.question.map((q, i) => (
-                              <li key={q._id || i} className="border rounded-md">
-                               
-                                <button
-                                  onClick={() =>
-                                    setOpenQues(
-                                      openQues === q._id ? null : q._id
-                                    )
-                                  }
-                                  className="w-full flex justify-between items-center p-2 text-left text-gray-700 hover:bg-gray-50"
+                            {Ques.map((q, i) => {
+                              const isDone = doneSet.has(q._id);
+                              const isBookmarked = bookmarkSet.has(q._id);
+
+                              return (
+                                <li
+                                  key={q._id || i}
+                                  className={`border rounded-md ${
+                                    isDone
+                                      ? "bg-green-100 border-green-400"
+                                      : "bg-white"
+                                  }`}
                                 >
-                                  {q.title}
-                                  <span className="text-gray-500">
-                                    {openQues === q._id ? "−" : "+"}
-                                  </span>
-                                </button>
+                                  <button
+                                    onClick={() =>
+                                      setOpenQues(
+                                        openQues === q._id ? null : q._id
+                                      )
+                                    }
+                                    className="w-full flex justify-between items-center p-2 text-left text-gray-700 hover:bg-gray-50"
+                                  >
+                                    {q.title}
+                                    <span className="text-gray-500">
+                                      {openQues === q._id ? "−" : "+"}
+                                    </span>
+                                  </button>
 
-                             
-                                <AnimatePresence>
-                                  {openQues === q._id && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.3 }}
-                                      className="px-4 pb-3 text-sm text-gray-600"
-                                    >
-                                      <p>
-                                        <span className="font-semibold">
-                                          Difficulty:
-                                        </span>{" "}
-                                       {getDifficultyBadge(q.difficulty)}
-                                      </p>
-                                      <p>
-                                        <span className="font-semibold">
-                                          Youtube:
-                                        </span>{" "}
-                                        <a
-                                          href={q.YURL}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-500 underline"
-                                        >
-                                          {q.YURL || "Unknown"}
-                                        </a>
-                                      </p>
-                                      {q.P1URL && (
-                                        <a
-                                          href={q.P1URL}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-blue-600 hover:underline block"
-                                        >
-                                          View Problem 1
-                                        </a>
-                                      )}
-                                      {q.P2URL && (
-                                        <a
-                                          href={q.P2URL}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-blue-600 hover:underline block"
-                                        >
-                                          View Problem 2
-                                        </a>
-                                      )}
+                                  <AnimatePresence>
+                                    {openQues === q._id && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="px-4 pb-3 text-sm text-gray-600"
+                                      >
+                                        <p>
+                                          <span className="font-semibold">
+                                            Difficulty:
+                                          </span>{" "}
+                                          {getDifficultyBadge(q.difficulty)}
+                                        </p>
+                                        <p>
+                                          <span className="font-semibold">
+                                            Youtube:
+                                          </span>{" "}
+                                          <a
+                                            href={q.YURL}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-500 underline"
+                                          >
+                                            {q.YURL || "Unknown"}
+                                          </a>
+                                        </p>
+                                        {q.P1URL && (
+                                          <a
+                                            href={q.P1URL}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline block"
+                                          >
+                                            View Problem 1
+                                          </a>
+                                        )}
+                                        {q.P2URL && (
+                                          <a
+                                            href={q.P2URL}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline block"
+                                          >
+                                            View Problem 2
+                                          </a>
+                                        )}
 
-                                    
-                                      {user && (
-                                        <div className="flex gap-4 mt-3">
-                                          <label className="flex items-center gap-2">
-                                            <input
-                                              type="checkbox"
-                                              onChange={() => toggleDone(q._id)}
-                                            />
-                                            Done
-                                          </label>
-                                          <label className="flex items-center gap-2">
-                                            <input
-                                              type="checkbox"
-                                              onChange={() =>
-                                                toggleBookmark(q._id)
-                                              }
-                                            />
-                                            Bookmark
-                                          </label>
-                                        </div>
-                                      )}
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </li>
-                            ))}
+                                        {user && (
+                                          <div className="flex gap-4 mt-3">
+                                            <label className="flex items-center gap-2">
+                                              <input
+                                                type="checkbox"
+                                                checked={isDone}
+                                                onChange={() =>
+                                                  toggleDone(q._id)
+                                                }
+                                              />
+                                              Done
+                                            </label>
+                                            <label className="flex items-center gap-2">
+                                              <input
+                                                type="checkbox"
+                                                checked={isBookmarked}
+                                                onChange={() =>
+                                                  toggleBookmark(q._id)
+                                                }
+                                              />
+                                              Bookmark
+                                            </label>
+                                          </div>
+                                        )}
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </li>
+                              );
+                            })}
                           </ul>
                         ) : (
                           <p className="text-sm text-gray-500 mt-2">
