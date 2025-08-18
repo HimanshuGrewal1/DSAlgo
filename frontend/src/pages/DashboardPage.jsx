@@ -4,12 +4,13 @@ import axios from "axios";
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(0);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
    
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/user/getUser", {
+        const { data } = await axios.get(`${API_URL}/api/user/getUser`, {
           withCredentials: true,
         });
         setUser(data.user);
@@ -49,7 +50,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Progress Tracker */}
+ 
       <div className="bg-white shadow rounded-2xl p-6 mb-6">
         <h2 className="text-xl font-semibold mb-3">Progress Tracker</h2>
         <div className="w-full bg-gray-200 rounded-full h-4">
@@ -61,7 +62,7 @@ export default function Dashboard() {
         <p className="mt-2 text-gray-700">{progress}% Completed</p>
       </div>
 
-      {/* Bookmarked Questions */}
+
       <div className="bg-white shadow rounded-2xl p-6 mb-6">
         <h2 className="text-xl font-semibold mb-3">Bookmarked Questions</h2>
         {user.BookMark && user.BookMark.length > 0 ? (

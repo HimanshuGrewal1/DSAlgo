@@ -14,7 +14,7 @@ const EmailVerificationPage = () => {
 	const handleChange = (index, value) => {
 		const newCode = [...code];
 
-		// Handle pasted content
+	
 		if (value.length > 1) {
 			const pastedCode = value.slice(0, 6).split("");
 			for (let i = 0; i < 6; i++) {
@@ -22,7 +22,7 @@ const EmailVerificationPage = () => {
 			}
 			setCode(newCode);
 
-			// Focus on the last non-empty input or the first empty one
+
 			const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
 			const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
 			inputRefs.current[focusIndex].focus();

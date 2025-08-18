@@ -27,6 +27,7 @@ const PaginationPage = () => {
   const [bookmarkSet, setBookmarkSet] = useState(new Set());
 
   const debouncedSearch = useDebounce(search, 300);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   
   const commands = [
@@ -62,7 +63,7 @@ const PaginationPage = () => {
 
   const fetchQuestions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/GETQUES", {
+      const res = await axios.get(`${API_URL}/api/GETQUES`, {
         params: { search: debouncedSearch, difficulty, page, limit },
       });
 
@@ -99,7 +100,7 @@ const PaginationPage = () => {
   const toggleDone = async (qid) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/user/MarkDone/${qid}`,
+        `${API_URL}/api/user/MarkDone/${qid}`,
         { withCredentials: true }
       );
       setDoneSet((prev) => {
@@ -117,7 +118,7 @@ const PaginationPage = () => {
   const toggleBookmark = async (qid) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/user/MarkBookMark/${qid}`,
+        `${API_URL}/api/user/MarkBookMark/${qid}`,
         { withCredentials: true }
       );
       setBookmarkSet((prev) => {

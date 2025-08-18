@@ -16,6 +16,8 @@ import { useEffect } from "react";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 import PaginationPage from "./pages/PaginationPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 
 const ProtectedRoute = ({ children }) => {
 	const { isAuthenticated, user } = useAuthStore();
@@ -24,9 +26,9 @@ const ProtectedRoute = ({ children }) => {
 		return <Navigate to='/login' replace />;
 	}
 
-	// if (!user.isVerified) {
-	// 	return <Navigate to='/verify-email' replace />;
-	// }
+	if (!user.isVerified) {
+		return <Navigate to='/verify-email' replace />;
+	}
 
 	return children;
 };
@@ -77,6 +79,28 @@ function App() {
 						<>
 							<Navbar/>
 							<PaginationPage />
+							</>
+						 // </ProtectedRoute> 
+					}
+				/>
+				<Route
+					path='/about'
+					element={
+						//  <ProtectedRoute> 
+						<>
+							<Navbar/>
+							<AboutPage/>
+							</>
+						 // </ProtectedRoute> 
+					}
+				/>
+				<Route
+					path='/contact'
+					element={
+						//  <ProtectedRoute> 
+						<>
+							<Navbar/>
+							<ContactPage />
 							</>
 						 // </ProtectedRoute> 
 					}

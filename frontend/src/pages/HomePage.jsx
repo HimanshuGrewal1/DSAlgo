@@ -15,10 +15,11 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [doneSet, setDoneSet] = useState(new Set());
   const [bookmarkSet, setBookmarkSet] = useState(new Set());
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const fetchCat = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/GETQUES/GetCat", {
+      const res = await axios.get(`${API_URL}/api/GETQUES/GetCat`, {
         withCredentials: true,
       });
 
@@ -38,7 +39,7 @@ const HomePage = () => {
    console.log(catId)
    const fetchQuesByCat = async () => {
    if(catId){ try {
-      const res = await axios.get(`http://localhost:5000/api/GETQUES/GetQuesByCat/${catId}`, {
+      const res = await axios.get(`${API_URL}/api/GETQUES/GetQuesByCat/${catId}`, {
        
       });
       console.log(res);
@@ -55,7 +56,7 @@ const HomePage = () => {
   const toggleDone = async (qid) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/user/MarkDone/${qid}`,
+        `${API_URL}/api/user/MarkDone/${qid}`,
         {},
         { withCredentials: true }
       );
@@ -75,7 +76,7 @@ const HomePage = () => {
   const toggleBookmark = async (qid) => {
     try {
       await axios.post(
-        `http://localhost:5000/api/user/MarkBookMark/${qid}`,
+        `${API_URL}/api/user/MarkBookMark/${qid}`,
         {},
         { withCredentials: true }
       );
